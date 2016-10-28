@@ -1,0 +1,27 @@
+<div class="container" id="page-design">
+  <h2 class="page-header">デザイン設定</h2>
+
+  <section>
+    <div class="well designPanel">
+      <form class="form-horizontal" ng-submit="submit()">
+        <div class="form-group">
+          <label class="col-xs-3 control-label">配布状況Aのマーカー色</label>
+          <div class="col-xs-2">
+            <color-picker ng-model="markerColorA" options="colorPickerOptions"></color-picker>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-xs-3 control-label">配布状況Bのマーカー色</label>
+          <div class="col-xs-2">
+            <color-picker ng-model="markerColorB" options="colorPickerOptions"></color-picker>
+          </div>
+        </div>
+        <div class="form-group btns">
+          <div class="col-xs-offset-3 col-xs-9">
+            <button type="submit" class="btn btn-primary">更新</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </section>
+</div>

@@ -1,0 +1,159 @@
+<div class="container" id="page-poi">
+  <h2 class="page-header">マップデータ</h2>
+
+  <section class="ng-cloak" ng-cloak>
+    <div class="well well-sm filterPanel">
+      <div class="form-horizontal">
+        <div class="form-group form-group-sm">
+          <div class="col-xs-3">
+            <input type="text" class="form-control" ng-model="searchString" ng-change="search()" placeholder="フリーワードで絞り込み">
+          </div>
+          <label class="control-label col-xs-1">配布状況A</label>
+          <div class="col-xs-2">
+            <select class="form-control input-sm" ng-model="filterA" ng-change="filter(filterA, 3)" ng-options="option.label as option.label for option in options">
+              <option value="">指定なし</option>
+            </select>
+          </div>
+          <label class="control-label col-xs-1">配布状況B</label>
+          <div class="col-xs-2">
+            <select class="form-control input-sm" ng-model="filterB" ng-change="filter(filterB, 5)" ng-options="option.label as option.label for option in options">
+              <option value="">指定なし</option>
+            </select>
+          </div>
+          <div class="col-xs-3 text-right">
+            <span uib-dropdown>
+              <span class="glyphicon glyphicon-cog configBtn" uib-dropdown-toggle></span>
+              <ul class="dropdown-menu" uib-dropdown-menu>
+                <li><a href ng-click="toggleStatusAll(0, true)">配布状況<strong>A</strong>をすべて<strong>配布済み</strong>にする</a></li>
+                <li><a href ng-click="toggleStatusAll(0, false)">配布状況<strong>A</strong>をすべて<strong>未配布</strong>にする</a></li>
+                <li class="divider"></li>
+                <li><a href ng-click="toggleStatusAll(1, true)">配布状況<strong>B</strong>をすべて<strong>配布済み</strong>にする</a></li>
+                <li><a href ng-click="toggleStatusAll(1, false)">配布状況<strong>B</strong>をすべて<strong>未配布</strong>にする</a></li>
+              </ul>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tableWrapper">
+      <table datatable="ng" dt-options="dtOptions" dt-column-defs="dtColumnDefs" dt-instance="dtInstanceCallback" class="table table-striped table-condensed">
+        <thead>
+          <tr>
+            <th></th>
+            <th>店舗名</th>
+            <th>配布状況A</th>
+            <th></th>
+            <th>配布状況B</th>
+            <th></th>
+            <th>住所</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="poi in pois track by $index">
+            <td>{{ poi.titleKana }}</td>
+            <td><a href ng-click="view($index)">{{ poi.title }}</a></td>
+            <td>
+              <select class="form-control input-sm" ng-model="poi.stocked[0]" ng-change="toggleStatus($index, 0)" ng-options="option.value as option.label for option in options">
+              </select>
+            </td>
+            <td>{{ poi.stocked[0] ? '配布済み' : '未配布' }}</td>
+            <td>
+              <select class="form-control input-sm" ng-model="poi.stocked[1]" ng-change="toggleStatus($index, 1)" ng-options="option.value as option.label for option in options">
+              </select>
+            </td>
+            <td>{{ poi.stocked[1] ? '配布済み' : '未配布' }}</td>
+            <td>{{ poi.address }}</td>
+            <td class="action">
+              <button type="button" class="btn btn-primary btn-sm" ng-click="edit($index)"><span class="glyphicon glyphicon-pencil"></span></button>
+              <button type="button" class="btn btn-danger btn-sm" ng-click="delete($index)"><span class="glyphicon glyphicon-trash"></span></button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="rightTopBtn">
+        <button type="button" class="btn btn-success btn-sm" ng-click="add()"><span class="glyphicon glyphicon-plus-sign"></span> 新規追加</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script type="text/ng-template" id="poi_modal">
+  <div class="modal-header">
+    <h3 class="modal-title" ng-bind="{ view: poi.title, add: '店舗を新規登録', edit: poi.title + ' を編集' }[mode]"></h3>
+  </div>
+  <div class="modal-body">
+    <div class="alert alert-danger" ng-show="error" ng-bind="error"></div>
+    <div class="form-horizontal ng-cloak" ng-cloak>
+      <div class="form-group">
+        <label class="col-xs-3 control-label">よみがな</label>
+        <div class="col-xs-6">
+          <p class="form-control-static" ng-bind="poi.titleKana" ng-show="mode == 'view'"></p>
+          <input type="text" class="form-control" ng-model="poi.titleKana" ng-show="mode != 'view'">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="col-xs-3 control-label">店舗名</label>
+        <div class="col-xs-6">
+          <p class="form-control-static" ng-bind="poi.title" ng-show="mode == 'view'"></p>
+          <input type="text" class="form-control" ng-model="poi.title" ng-show="mode != 'view'">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="col-xs-3 control-label">住所</label>
+        <div class="col-xs-8">
+          <p class="form-control-static" ng-bind="poi.address" ng-show="mode == 'view'"></p>
+          <input type="text" class="form-control" ng-model="poi.address" ng-show="mode != 'view'">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="col-xs-3 control-label">電話番号</label>
+        <div class="col-xs-4">
+          <p class="form-control-static" ng-bind="poi.phone" ng-show="mode == 'view'"></p>
+          <input type="text" class="form-control" ng-model="poi.phone" ng-show="mode != 'view'">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="col-xs-3 control-label">備考</label>
+        <div class="col-xs-8">
+          <p class="form-control-static" ng-bind="poi.description" ng-show="mode == 'view'"></p>
+          <input type="text" class="form-control" ng-model="poi.description" ng-show="mode != 'view'">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="col-xs-3 control-label">緯度</label>
+        <div class="col-xs-4">
+          <p class="form-control-static" ng-bind="poi.latitude" ng-show="mode == 'view'"></p>
+          <input type="text" class="form-control" ng-model="poi.latitude" ng-show="mode != 'view'">
+        </div>
+        <div class="col-xs-5">
+          <button type="button" class="btn btn-success btn-sm" style="margin-top: 26px; margin-bottom: -26px;" ng-show="mode != 'view'" ng-click="convert()" ng-disabled="!poi.address">住所から緯度経度に変換</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="col-xs-3 control-label">経度</label>
+        <div class="col-xs-4">
+          <p class="form-control-static" ng-bind="poi.longitude" ng-show="mode == 'view'"></p>
+          <input type="text" class="form-control" ng-model="poi.longitude" ng-show="mode != 'view'">
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-xs-offset-3 col-xs-9">
+          <p class="form-control-static text-warning" ng-show="mode == 'view && poi.isHidden'">この店舗は非表示になっています。</p>
+          <div class="checkbox" ng-show="mode != 'view'">
+            <label>
+              <input type="checkbox" ng-model="poi.isHidden"> 一時的に非表示にする
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-default" ng-click="close()">閉じる</button>
+    <button type="button" class="btn btn-info" ng-show="mode == 'view'" ng-click="mode = 'edit'">編集する</button>
+    <button type="button" class="btn btn-primary" ng-show="mode != 'view'" ng-click="apply()">更新</button>
+  </div>
+</script>

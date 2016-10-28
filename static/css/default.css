@@ -1,0 +1,90 @@
+body {
+  padding-top: 80px;
+}
+
+section {
+  margin-bottom: 30px;
+}
+
+iframe {
+  border: 0 none;
+  outline: 0;
+  width: 100%;
+  height: 800px;
+}
+
+[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+  display: none !important;
+}
+
+.page-header {
+  margin-top: 15px;
+}
+
+.form-group.btns {
+  margin-top: 30px;
+}
+
+.table-condensed > thead > tr > th,
+.table-condensed > tbody > tr > td {
+  padding: 3px 10px;
+}
+
+#page-home .topControls form {
+  margin-bottom: -15px;
+}
+#page-home .mapHeading {
+  margin-bottom: 10px;
+}
+#page-home .mapHeading h3 {
+  margin: 0;
+}
+
+#page-poi .filterPanel .form-group {
+  margin-bottom: 0;
+}
+#page-poi .filterPanel .control-label {
+  padding-right: 0;
+}
+#page-poi .filterPanel .configBtn {
+  display: inline-block;
+  color: #ccc;
+  font-size: 18px;
+  margin-top: 6px;
+}
+#page-poi .filterPanel .dropdown-menu {
+  left: auto;
+  right: 0;
+}
+#page-poi .configBtn:hover {
+  color: inherit;
+  cursor: pointer;
+}
+#page-poi .tableWrapper {
+  position: relative;
+}
+#page-poi .dataTables_filter {
+  display: none;
+}
+#page-poi .table > thead > tr > th {
+  white-space: nowrap;
+}
+#page-poi .table > tbody > tr > td {
+  vertical-align: middle;
+}
+#page-poi .table > tbody > tr > td.action {
+  text-align: right;
+  white-space: nowrap;
+  width: 1em;
+}
+#page-poi .rightTopBtn {
+  position: absolute;
+  right: 0;
+  top: 0;
+  text-align: right;
+}
+
+#page-home .designPanel form {
+  margin-bottom: -15px;
+}
+

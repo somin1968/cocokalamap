@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ config.page_title }}</title>
+    <style>
+      html, body {
+        margin: 0px;
+        padding: 0px;
+        height: 100%;
+      }
+      header {
+        display: table;
+        background-color: #569536;
+        border-bottom: 1px solid #ccc;
+        box-sizing: border-box;
+        width: 100%;
+        height: 40px;
+      }
+      header .heading {
+        display: table-cell;
+        text-align: center;
+        color: #fff;
+        font-size: 13px;
+        vertical-align: middle;
+        padding: 0 15px;
+      }
+      header .headingTitle {
+        font-size: 20px;
+        font-weight: normal;
+        vertical-align: -2px;
+        margin: 0 15px 0 0;
+        padding: 0;
+      }
+      #map-canvas {
+        position: relative;
+      {% if embed %}
+        height: 100%;
+      {% else %}
+        height: calc(100% - 60px);
+      {% endif %}
+      }
+      #map-canvas .centerMessage {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 45%;
+        text-align: center;
+        color: #666;
+        font-size: 12px;
+      }
+      footer {
+        background-color: #f0f0f0;
+        border-top: 1px solid #ccc;
+        box-sizing: border-box;
+        height: 20px;
+      }
+      footer .credit {
+        text-align: center;
+        font-size: 11px;
+        margin: 0;
+        padding: 0;
+      }
+      .regend {
+        background-color: #fff;
+        border-radius: 2px;
+        box-shadow: 0 1px 4px -1px rgba(0, 0, 0, 0.298039);
+        margin: 10px;
+      }
+      .regend ul {
+        margin: 0;
+        padding: 0;
+      }
+      .regend ul li {
+        display: inline-block;
+        list-style: none;
+        text-align: center;
+        margin: 0;
+        padding: 5px;
+      }
+      .infoBoxContent {
+        background-color: #fff;
+        box-shadow: 1px 1px 3px rgba(0, 0, 0, .3);
+        margin: 0;
+        padding: 10px;
+        width: 280px;
+      }
+      .infoBoxContent:after {
+        position: absolute;
+        bottom: -20px;
+        left: 130px;
+        content: " ";
+        width: 0;
+        height: 0;
+        border-top: 20px solid #fff;
+        border-right: 10px solid transparent;
+        border-left: 10px solid transparent;
+      }
+      .infoBoxContent p {
+        font-size: 13px;
+        margin: .5em 0;
+      }
+    </style>
+    <script type="text/html" id="regend-template">
+      <ul>
+        <li><img src="//chart.googleapis.com/chart?chst=d_map_pin_letter&amp;chld=|{{ config.marker_colors[0] }}"><br>配布済み</li>
+        <li><img src="//chart.googleapis.com/chart?chst=d_map_pin_letter&amp;chld=|{{ config.marker_colors[1] }}"><br>未配布</li>
+      </ul>
+    </script>
+    <script type="text/html" id="infobox-template">
+      <p><strong><%= title %></strong></p>
+      <p><%= address %></p>
+    </script>
+  </head>
+
+  <body>
+  {% if not embed %}
+    <header>
+      <div class="heading">
+        <h1 class="headingTitle">{{ config.page_title }}</h1>
+      </div>
+    </header>
+  {% endif %}
+
+    <div id="map-canvas">
+    {% if config.is_maintained and not is_individual %}
+      <div class="centerMessage">ただ今、メンテナンス中です。今しばらくお待ちください。</div>
+    {% endif %}
+    </div>
+
+  {% if not embed %}
+    <footer>
+      <p class="credit">Copyright 2016 <a href="http://www.cocokala.jp">ココカラ</a>. Developed by <a href="http://www.mnemonic.co.jp">ニモニク</a>.</p>
+    </footer>
+  {% endif %}
+
+    <script src="https://maps.google.com/maps/api/js?key=AIzaSyA17W3s7i1mvELoe5TcvJFVc798wNMDM7Q"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.13.1/lodash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="/js/infobox.js"></script>
+    <script>
+      $(function() {
+      {% if not config.is_maintained or is_individual %}
+        var markerColors = ['{{ config.marker_colors[0] }}', '{{ config.marker_colors[1] }}'];
+        var markers = [];
+
+        var map = new google.maps.Map(document.getElementById('map-canvas'), {
+          mapTypeId: google.maps.MapTypeId.ROADMAP
+        });
+        var legendElement = document.createElement('div');
+        legendElement.className = 'regend';
+        var compiled = _.template($('#regend-template').html());
+        legendElement.innerHTML = compiled();
+        map.controls[google.maps.ControlPosition.RIGHT_TOP].push(legendElement);
+
+        var infoBox = new InfoBox({
+            alignBottom: true,
+            maxWidth: 0,
+            zIndex: null,
+            pane: 'floatPane',
+            enableEventPropagation: false,
+            pixelOffset: new google.maps.Size(-140, -60)
+        });
+
+        $.ajax({
+          url: '/api/poi',
+          type: 'GET'
+        }).done(function(data, status, xhr) {
+          onLoadPOI(JSON.parse(data));
+        });
+
+        function onLoadPOI(POIs) {
+          _.each(POIs, function(poi) {
+            renderMarker(poi);
+          });
+          var minX = 180;
+          var maxX = -180;
+          var minY = 90;
+          var maxY = -90;
+          _.each(markers, function(marker) {
+            var thisLat = marker.getPosition().lat();
+            var thisLng = marker.getPosition().lng();
+            if (typeof thisLat === 'number' && typeof thisLng === 'number') {
+              if (thisLat <= minY) {
+                minY = thisLat;
+              }
+              if (thisLat > maxY) {
+                maxY = thisLat;
+              }
+              if (thisLng <= minX) {
+                minX = thisLng;
+              }
+              if (thisLng > maxX) {
+                maxX = thisLng;
+              }
+            }
+          });
+          var southWest = new google.maps.LatLng(minY, minX);
+          var northEast = new google.maps.LatLng(maxY, maxX);
+          map.fitBounds(new google.maps.LatLngBounds(southWest, northEast));
+        }
+
+        function renderMarker(poi) {
+          var marker = new google.maps.Marker({
+            position: new google.maps.LatLng(poi.latitude, poi.longitude),
+            icon: new google.maps.MarkerImage('//chart.googleapis.com/chart?chst=d_map_pin_letter&chld=|' + markerColors[poi.stocked ? 0 : 1]),
+            map: map
+          });
+          google.maps.event.addListener(marker, 'click', function(poi) {
+            return function() {
+              showInfoBox(poi);
+            };
+          }(poi), false);
+          markers.push(marker);
+        }
+
+        function showInfoBox(poi) {
+          var infoBoxElement = document.createElement('div');
+          infoBoxElement.className = 'infoBoxContent';
+          infoBox.setContent(infoBoxElement);
+          var compiled = _.template($('#infobox-template').html());
+          infoBoxElement.innerHTML = compiled(poi);
+          infoBox.setPosition(new google.maps.LatLng(poi.latitude, poi.longitude));
+          infoBox.open(map);
+        }
+      {% endif %}
+      });
+    </script>
+  </body>
+</html>
