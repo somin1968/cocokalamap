@@ -1,9 +1,5 @@
-*.pyc
-ds
-*.coverage
-*~
-.appengine_data
-.idea
-app/static/.sass-cache/
+*.py[cod]
+*.db
+
 *.sublime-project
 *.sublime-workspace
