@@ -255,15 +255,15 @@
     var url = '/admin/api/design';
 
     $http.get(url).success(function(response) {
-      $scope.markerColorA = response.markerColors.length > 0 ? convertToHex(response.markerColors[0]) : null;
-      $scope.markerColorB = response.markerColors.length > 1 ? convertToHex(response.markerColors[1]) : null;
+      $scope.markerColorA = response.markerColors.length > 0 ? response.markerColors[0] : null;
+      $scope.markerColorB = response.markerColors.length > 1 ? response.markerColors[1] : null;
     }).error(function() {
       toastr.danger('サーバとの通信時にエラーが発生しました。');
     });
 
     $scope.submit = function() {
       var payload = {
-        marker_colors: [$scope.markerColorA ? convertFromHex($scope.markerColorA) : null, $scope.markerColorB ? convertFromHex($scope.markerColorB) : null]
+        marker_colors: [$scope.markerColorA ? convertHex($scope.markerColorA) : null, $scope.markerColorB ? convertHex($scope.markerColorB) : null]
       }
       $http.post(url, payload).success(function(response) {
         toastr.success('更新は正常に完了しました。');
@@ -272,12 +272,11 @@
       });
     };
 
-    function convertToHex(string) {
-      return '#' + string.toLowerCase();
-    }
-
-    function convertFromHex(string) {
-      return string.replace('#', '').toUpperCase();
+    function convertHex(string) {
+      if (string.slice(0, 1) !== '#') {
+        string = '#' + string;
+      }
+      return string.toLowerCase();
     }
   });
 
