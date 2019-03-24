@@ -153,7 +153,7 @@
         legendElement.className = 'regend';
         var compiled = _.template($('#regend-template').html());
         legendElement.innerHTML = compiled();
-        map.controls[google.maps.ControlPosition.RIGHT_TOP].push(legendElement);
+        map.controls[google.maps.ControlPosition.TOP_RIGHT].push(legendElement);
 
         var infoBox = new InfoBox({
             alignBottom: true,
